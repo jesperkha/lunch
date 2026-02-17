@@ -1,13 +1,11 @@
 package config
 
 type Config struct {
-	ApiPort       string
-	DashboardPort string
+	Port string
 }
 
 func Load() *Config {
 	return &Config{
-		ApiPort:       ":4040",
-		DashboardPort: ":8080",
+		Port: ":8080",
 	}
 }

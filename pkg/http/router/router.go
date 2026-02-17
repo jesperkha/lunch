@@ -2,8 +2,8 @@ package router
 
 import (
 	"context"
-	"lunch/domain/port"
-	"lunch/http/handler"
+	"log"
+	"lunch/pkg/http/handler"
 	"net/http"
 
 	"github.com/jesperkha/notifier"
@@ -13,13 +13,12 @@ import (
 // Handler type. It also implements http.Handler.
 type Router struct {
 	mux     *Mux
-	logger  port.Logger
 	cleanup func()
 }
 
-func New(logger port.Logger, middleware ...func(http.Handler) http.Handler) *Router {
+func New(middleware ...func(http.Handler) http.Handler) *Router {
 	mux := NewMux(middleware...)
-	return &Router{mux, logger, func() {}}
+	return &Router{mux, func() {}}
 }
 
 func (rt *Router) Handle(method string, pattern string, h handler.Handler, middleware ...handler.Middleware) {
@@ -46,21 +45,17 @@ func (r *Router) Serve(notif *notifier.Notifier, port string) {
 	go func() {
 		<-done
 		if err := server.Shutdown(ctx); err != nil {
-			r.logger.Error("shutdown failed",
-				"error", err,
-			)
+			log.Printf("shutdown failed: %v", err)
 		}
 
-		r.logger.Info("server stopped")
+		log.Println("server stopped")
 		r.cleanup()
 		finish()
 	}()
 
-	r.logger.Info("server running at http://localhost" + port)
+	log.Println("server running at http://localhost" + port)
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		r.logger.Error("error starting http server",
-			"error", err,
-		)
+		log.Printf("error starting http server: %v", err)
 	}
 }
 

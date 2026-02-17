@@ -5,8 +5,8 @@ import (
 	"syscall"
 
 	"lunch/config"
-	"lunch/http"
 	"lunch/infra/logger"
+	"lunch/routes"
 
 	"github.com/jesperkha/notifier"
 )
@@ -17,7 +17,11 @@ func main() {
 
 	logger := logger.NewLogger()
 
-	go http.RunDashboard(notif, logger, config)
+	go routes.RunServer(
+		notif,
+		logger,
+		config,
+	)
 
 	notif.NotifyOnSignal(os.Interrupt, syscall.SIGINT)
 	logger.Info("shutdown complete")
