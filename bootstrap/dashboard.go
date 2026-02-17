@@ -1,6 +1,12 @@
 package bootstrap
 
-import "github.com/jesperkha/notifier"
+import (
+	"lunch/adapter/http"
+	"lunch/config"
 
-func RunDashboard(notif *notifier.Notifier) {
+	"github.com/jesperkha/notifier"
+)
+
+func RunDashboard(notif *notifier.Notifier, config *config.Config) {
+	http.RunDashboard(notif, nil, config)
 }
