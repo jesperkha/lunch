@@ -1,9 +1,9 @@
 package http
 
 import (
-	"lunch/adapter/http/router"
 	"lunch/config"
 	"lunch/domain/port"
+	"lunch/http/router"
 
 	"github.com/jesperkha/notifier"
 )

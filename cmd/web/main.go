@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"os"
 	"syscall"
 
-	"lunch/bootstrap"
 	"lunch/config"
+	"lunch/http"
+	"lunch/infra/logger"
 
 	"github.com/jesperkha/notifier"
 )
@@ -15,9 +15,10 @@ func main() {
 	notif := notifier.New()
 	config := config.Load()
 
-	go bootstrap.RunApi(notif, config)
-	go bootstrap.RunDashboard(notif, config)
+	logger := logger.NewLogger()
+
+	go http.RunDashboard(notif, logger, config)
 
 	notif.NotifyOnSignal(os.Interrupt, syscall.SIGINT)
-	log.Println("shutdown complete")
+	logger.Info("shutdown complete")
 }

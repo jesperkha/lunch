@@ -7,7 +7,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		ApiPort:       ":8080",
+		ApiPort:       ":4040",
 		DashboardPort: ":8080",
 	}
 }

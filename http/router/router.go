@@ -2,8 +2,8 @@ package router
 
 import (
 	"context"
-	"lunch/adapter/http/handler"
 	"lunch/domain/port"
+	"lunch/http/handler"
 	"net/http"
 
 	"github.com/jesperkha/notifier"
@@ -46,19 +46,19 @@ func (r *Router) Serve(notif *notifier.Notifier, port string) {
 	go func() {
 		<-done
 		if err := server.Shutdown(ctx); err != nil {
-			r.logger.Error(ctx, "shutdown failed",
+			r.logger.Error("shutdown failed",
 				"error", err,
 			)
 		}
 
-		r.logger.Info(ctx, "http server stopped")
+		r.logger.Info("server stopped")
 		r.cleanup()
 		finish()
 	}()
 
-	r.logger.Info(ctx, "server running at http://localhost"+port)
+	r.logger.Info("server running at http://localhost" + port)
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		r.logger.Error(ctx, "error starting http server",
+		r.logger.Error("error starting http server",
 			"error", err,
 		)
 	}

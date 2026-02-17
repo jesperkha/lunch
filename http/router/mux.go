@@ -1,7 +1,7 @@
 package router
 
 import (
-	"lunch/adapter/http/handler"
+	"lunch/http/handler"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
