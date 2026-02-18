@@ -1,5 +1,7 @@
 package port
 
+//go:generate mockgen -source=github.go -destination=mocks/mock_github.go -package=mocks
+
 import "lunch/domain/model"
 
 // GithubRepository defines the interface for GitHub repository operations.
