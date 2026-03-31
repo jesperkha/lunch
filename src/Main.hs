@@ -1,7 +1,7 @@
 module Main where
 
 import Domain.Port.Logger (Logger (logInfo))
-import Infra.LoggerImpl (newLogger)
+import Infra.Logger (newLogger)
 
 main :: IO ()
 main = do
