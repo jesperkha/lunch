@@ -1,9 +1,9 @@
 module Main where
 
-import Domain.Port.Logger (Logger (logInfo))
-import Infra.Logger (newLogger)
+import Adapter.Cli (runCli)
+import Bootstrap (bootstrap)
 
 main :: IO ()
 main = do
-  logger <- newLogger
-  logInfo logger "Hello"
+  env <- bootstrap
+  runCli env
