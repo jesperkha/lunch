@@ -1,4 +1,4 @@
-module Domain.Port (Logger (..), GitRepo (..), Env (..)) where
+module Domain.Port (Logger (..), GitRepo (..), Env (..), DockerRepo (..)) where
 
 import Domain.Model (ProjectUrl)
 
@@ -6,7 +6,8 @@ import Domain.Model (ProjectUrl)
 data Env m
   = Env
   { envLogger :: Logger,
-    envGitRepo :: GitRepo m
+    envGitRepo :: GitRepo m,
+    envDockerRepo :: DockerRepo m
   }
 
 -- | Logger is a simple interface for printing out formatted strings
@@ -20,4 +21,10 @@ data Logger = Logger
 newtype GitRepo m = GitRepo
   { -- Clone a remote git repo into the given filepath
     cloneRepo :: ProjectUrl -> FilePath -> m ()
+  }
+
+-- | DockerRepo handles actions related to building and running docker images and compose
+newtype DockerRepo m = DockerRepo
+  { -- Build the Docker image of the given project
+    buildProject :: FilePath -> m ()
   }
