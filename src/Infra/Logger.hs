@@ -1,0 +1,11 @@
+module Infra.Logger where
+
+import Domain.Port (Logger (..))
+
+newLogger :: Logger
+newLogger =
+  Logger
+    { logInfo = \msg -> putStrLn $ "[INFO] " <> msg,
+      logWarn = \msg -> putStrLn $ "[WARN] " <> msg,
+      logError = \msg -> putStrLn $ "[ERROR] " <> msg
+    }
