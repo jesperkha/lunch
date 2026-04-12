@@ -1,9 +1,8 @@
-module Domain.Usecase where
+module Domain.Usecase (deploy) where
 
-import Bootstrap (Env, envGitRepo)
 import Data.List.Split (splitOn)
 import Domain.Model (ProjectUrl)
-import Domain.Port (GitRepo (..))
+import Domain.Port (Env (..), GitRepo (..))
 import System.FilePath (takeBaseName, (</>))
 
 -- Destination root dir of downloaded projects

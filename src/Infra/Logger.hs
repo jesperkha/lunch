@@ -1,4 +1,4 @@
-module Infra.Logger where
+module Infra.Logger (newLogger) where
 
 import Domain.Port (Logger (..))
 

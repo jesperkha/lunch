@@ -1,10 +1,7 @@
-module Infra.Git where
+module Infra.Git (newGitRepo) where
 
 import Domain.Port (GitRepo (..), Logger, logInfo)
 import System.Process (callProcess)
-
-workDir :: FilePath
-workDir = "./data"
 
 newGitRepo :: Logger -> GitRepo IO
 newGitRepo logger =

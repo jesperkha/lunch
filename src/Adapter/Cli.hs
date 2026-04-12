@@ -1,4 +1,4 @@
-module Adapter.Cli where
+module Adapter.Cli (runCli) where
 
 import Bootstrap
 import Domain.Usecase (deploy)
