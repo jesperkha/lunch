@@ -1,6 +1,7 @@
 module Adapter.Cli where
 
 import Bootstrap
+import Domain.Usecase (deploy)
 import Options.Applicative
 
 data Command
@@ -28,7 +29,11 @@ commandParser =
 mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
-runCli :: Env -> IO ()
-runCli _ = do
+runCli :: Env IO -> IO ()
+runCli env = do
   c <- mainParser
-  print c
+  case c of
+    Deploy url -> deploy env url
+    Update _ -> pure ()
+    Up _ -> pure ()
+    Down _ -> pure ()

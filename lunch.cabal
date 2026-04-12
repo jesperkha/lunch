@@ -62,17 +62,19 @@ executable lunch
 
     -- Modules included in this executable, other than Main.
     other-modules:
-        Domain.Port.Logger
+        Domain.Port
         Domain.Model
         Infra.Logger
         Adapter.Cli
         Bootstrap
+        Infra.Git
+        Domain.Usecase
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends: optparse-applicative ^>=0.18.1.0, text ^>=2.0.2, base ^>=4.18.3.0
+    build-depends: split ^>=0.2.5, filepath ^>=1.4.301.0, optparse-applicative ^>=0.18.1.0, text ^>=2.0.2, base ^>=4.18.3.0, process ^>= 1.6.19.0
 
     -- Directories containing source files.
     hs-source-dirs:   src

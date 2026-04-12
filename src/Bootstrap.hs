@@ -1,16 +1,21 @@
 module Bootstrap (Env (..), bootstrap) where
 
-import Domain.Port.Logger (Logger)
+import Domain.Port (GitRepo (..), Logger)
+import Infra.Git (newGitRepo)
 import Infra.Logger (newLogger)
 
-newtype Env = Env
-  { envLogger :: Logger
+data Env m
+  = Env
+  { envLogger :: Logger,
+    envGitRepo :: GitRepo m
   }
 
-bootstrap :: IO Env
+bootstrap :: IO (Env IO)
 bootstrap = do
-  logger <- newLogger
+  let logger = newLogger
+  let gitRepo = newGitRepo logger
   pure
     Env
-      { envLogger = logger
+      { envLogger = logger,
+        envGitRepo = gitRepo
       }

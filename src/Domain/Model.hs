@@ -1,6 +1,3 @@
-module Domain.Model where
+module Domain.Model (ProjectUrl) where
 
-data Project = Project
-  { name :: String,
-    description :: String
-  }
+type ProjectUrl = String
