@@ -10,25 +10,24 @@ import System.FilePath (takeBaseName)
 import System.FilePath.Posix ((</>))
 import System.Process (callProcess)
 
-checkDockerFiles :: Logger -> FilePath -> ExceptT AppError IO ()
-checkDockerFiles logger path = do
-  fileMustExist logger (path </> "Dockerfile") "Missing Dockerfile"
-  fileMustExist logger (path </> "docker-compose.yml") "Missing docker-compose.yml"
+checkDockerFiles :: FilePath -> ExceptT AppError IO ()
+checkDockerFiles path = do
+  fileMustExist (path </> "Dockerfile") "Missing Dockerfile"
+  fileMustExist (path </> "docker-compose.yml") "Missing docker-compose.yml"
 
-fileMustExist :: Logger -> FilePath -> String -> ExceptT AppError IO ()
-fileMustExist logger path msg = do
+fileMustExist :: FilePath -> String -> ExceptT AppError IO ()
+fileMustExist path msg = do
   exists <- lift $ doesFileExist path
   if exists
     then pure ()
     else do
-      lift $ logError logger msg
       throwE (ConfigError msg)
 
 newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
   DockerRepo
     { buildProject = \dir -> do
-        checkDockerFiles logger dir
+        checkDockerFiles dir
         lift $ logInfo logger ("Building Docker image for " <> takeBaseName dir <> "...")
         result <- lift (try (callProcess "docker" ["compose", "-f", dir <> "/docker-compose.yml", "--build", "-d"]) :: IO (Either IOException ()))
         case result of

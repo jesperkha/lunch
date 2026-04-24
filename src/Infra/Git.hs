@@ -20,7 +20,6 @@ newGitRepo logger =
             result <- lift (try (callProcess "git" ["clone", "https://" <> url, path]) :: IO (Either IOException ()))
             case result of
               Left err -> do
-                lift $ logError logger (show err)
-                throwE (GitError "Git clone failed")
+                throwE (GitError $ "Git clone failed" <> show err)
               Right _ -> pure ()
     }
