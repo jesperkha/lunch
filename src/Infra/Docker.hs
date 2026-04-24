@@ -30,5 +30,5 @@ newDockerRepo logger =
         checkDockerFiles logger dir
         -- Build docker image
         logInfo logger ("Building Docker image for " <> takeBaseName dir <> "...")
-        callProcess "docker" ["compose", "-f", dir <> "/docker-compose.yml", "build"]
+        callProcess "docker" ["compose", "-f", dir <> "/docker-compose.yml", "--build", "-d"]
     }
