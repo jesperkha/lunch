@@ -5,12 +5,11 @@ import Infra.Docker (newDockerRepo)
 import Infra.Git (newGitRepo)
 import Infra.Logger (newLogger)
 
-bootstrap :: IO (Env IO)
+bootstrap :: IO Env
 bootstrap = do
   let logger = newLogger
   let gitRepo = newGitRepo logger
   let dockerRepo = newDockerRepo logger
-
   pure
     Env
       { envLogger = logger,

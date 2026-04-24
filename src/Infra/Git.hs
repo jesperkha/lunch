@@ -1,21 +1,26 @@
 module Infra.Git (newGitRepo) where
 
-import Domain.Port (GitRepo (..), Logger, logInfo)
+import Control.Exception (IOException, try)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Except (throwE)
+import Domain.Model (AppError (..))
+import Domain.Port (GitRepo (..), Logger (..))
 import System.Directory (doesPathExist)
 import System.Process (callProcess)
 
-newGitRepo :: Logger -> GitRepo IO
+newGitRepo :: Logger -> GitRepo
 newGitRepo logger =
   GitRepo
     { cloneRepo = \url path -> do
-        -- Check if repo already exists
-        exists <- doesPathExist path
-        ( if exists
-            then logInfo logger "Project exists. Skipping clone."
-            else
-              ( do
-                  logInfo logger $ "Cloning " <> url <> " into " <> path <> "..."
-                  callProcess "git" ["clone", "https://" <> url, path]
-              )
-          )
+        exists <- lift $ doesPathExist path
+        if exists
+          then lift $ logInfo logger "Project exists. Skipping clone."
+          else do
+            lift $ logInfo logger $ "Cloning " <> url <> " into " <> path <> "..."
+            result <- lift (try (callProcess "git" ["clone", "https://" <> url, path]) :: IO (Either IOException ()))
+            case result of
+              Left err -> do
+                lift $ logError logger (show err)
+                throwE (GitError "Git clone failed")
+              Right _ -> pure ()
     }

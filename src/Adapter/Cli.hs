@@ -1,8 +1,11 @@
 module Adapter.Cli (runCli) where
 
-import Bootstrap
+import Bootstrap (Env (..))
+import Control.Monad.Trans.Except (runExceptT)
+import Domain.Port (Logger (..))
 import Domain.Usecase (deploy)
 import Options.Applicative
+import System.Exit (exitFailure)
 
 data Command
   = Deploy String
@@ -29,11 +32,17 @@ commandParser =
 mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
-runCli :: Env IO -> IO ()
+runCli :: Env -> IO ()
 runCli env = do
   c <- mainParser
   case c of
-    Deploy url -> deploy env url
+    Deploy url -> do
+      result <- runExceptT (deploy env url)
+      case result of
+        Left err -> do
+          logError (envLogger env) (show err)
+          exitFailure
+        Right _ -> pure ()
     Update _ -> pure ()
     Up _ -> pure ()
     Down _ -> pure ()

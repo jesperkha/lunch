@@ -1,13 +1,14 @@
-module Domain.Port (Logger (..), GitRepo (..), Env (..), DockerRepo (..)) where
+module Domain.Port (Logger (..), GitRepo (..), DockerRepo (..), Env (..)) where
 
-import Domain.Model (ProjectUrl)
+import Control.Monad.Trans.Except (ExceptT)
+import Domain.Model (AppError, ProjectUrl)
 
 -- | Env is the collection of ports used by domain usecases and service
-data Env m
+data Env
   = Env
   { envLogger :: Logger,
-    envGitRepo :: GitRepo m,
-    envDockerRepo :: DockerRepo m
+    envGitRepo :: GitRepo,
+    envDockerRepo :: DockerRepo
   }
 
 -- | Logger is a simple interface for printing out formatted strings
@@ -18,13 +19,11 @@ data Logger = Logger
   }
 
 -- | GitRepo handles actions related to git
-newtype GitRepo m = GitRepo
-  { -- Clone a remote git repo into the given filepath
-    cloneRepo :: ProjectUrl -> FilePath -> m ()
+newtype GitRepo = GitRepo
+  { cloneRepo :: ProjectUrl -> FilePath -> ExceptT AppError IO ()
   }
 
 -- | DockerRepo handles actions related to building and running docker images and compose
-newtype DockerRepo m = DockerRepo
-  { -- Build the Docker image of the given project
-    buildProject :: FilePath -> m ()
+newtype DockerRepo = DockerRepo
+  { buildProject :: FilePath -> ExceptT AppError IO ()
   }
