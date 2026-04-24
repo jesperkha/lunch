@@ -1,9 +1,10 @@
 module Adapter.Cli (runCli) where
 
 import Bootstrap (Env (..))
-import Control.Monad.Trans.Except (runExceptT)
+import Control.Monad.Trans.Except (ExceptT, runExceptT)
+import Domain.Model (AppError)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy)
+import Domain.Usecase (deploy, list)
 import Options.Applicative
 import System.Exit (exitFailure)
 
@@ -12,6 +13,7 @@ data Command
   | Update String
   | Up String
   | Down String
+  | List
   deriving (Show)
 
 -- Command info for command variant. [arg name] -> [description]
@@ -32,17 +34,22 @@ commandParser =
 mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
+-- Run given domain function. Prints and exits on error.
+runCommand :: Env -> ExceptT AppError IO () -> IO ()
+runCommand env f = do
+  result <- runExceptT f
+  case result of
+    Left err -> do
+      logError (envLogger env) (show err)
+      exitFailure
+    Right _ -> pure ()
+
 runCli :: Env -> IO ()
 runCli env = do
   c <- mainParser
   case c of
-    Deploy url -> do
-      result <- runExceptT (deploy env url)
-      case result of
-        Left err -> do
-          logError (envLogger env) (show err)
-          exitFailure
-        Right _ -> pure ()
+    Deploy url -> do runCommand env (deploy env url)
+    List -> do runCommand env (list env)
     Update _ -> pure ()
     Up _ -> pure ()
     Down _ -> pure ()

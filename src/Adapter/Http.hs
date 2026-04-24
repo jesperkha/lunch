@@ -3,11 +3,25 @@
 module Adapter.Http (runHttp) where
 
 import Bootstrap (Env (..))
-import Control.Monad.Trans.Except (runExceptT)
+import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Data.Text.Lazy (Text, pack, unpack)
+import Domain.Model (AppError)
+import Domain.Port (Logger (..))
 import Domain.Usecase (deploy)
-import Network.HTTP.Types.Status (status200, status500)
+import Network.HTTP.Types.Status (Status, status200, status500)
 import Web.Scotty
+
+-- Run domain action. Passing a tuple of status codes for (success, error).
+runHandler :: Env -> (Status, Status) -> ExceptT AppError IO () -> ActionM ()
+runHandler env s f = do
+  result <- liftIO $ runExceptT f
+  case result of
+    Left err -> do
+      liftIO $ logError (envLogger env) (show err)
+      text (pack $ show err)
+      status $ fst s
+    Right _ ->
+      status $ snd s
 
 runHttp :: Env -> IO ()
 runHttp env = scotty 8080 $ do
@@ -16,10 +30,4 @@ runHttp env = scotty 8080 $ do
 
   post "/deploy" $ do
     url <- queryParam "url" :: ActionM Text
-    result <- liftIO $ runExceptT (deploy env (unpack url))
-    case result of
-      Left err -> do
-        status status500
-        text (pack $ show err)
-      Right _ ->
-        status status200
+    runHandler env (status200, status500) (deploy env (unpack url))
