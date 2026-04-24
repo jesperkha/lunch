@@ -66,6 +66,7 @@ executable lunch
         Domain.Model
         Infra.Logger
         Adapter.Cli
+        Adapter.Http
         Bootstrap
         Infra.Git
         Domain.Usecase
@@ -75,10 +76,12 @@ executable lunch
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends: directory ^>=1.3.8.5, split ^>=0.2.5, filepath ^>=1.4.301.0, optparse-applicative ^>=0.18.1.0, text ^>=2.0.2, base ^>=4.18.3.0, process ^>= 1.6.19.0
+    build-depends: http-types ^>=0.12.4, directory ^>=1.3.8.5, split ^>=0.2.5, filepath ^>=1.4.301.0, optparse-applicative ^>=0.18.1.0, text ^>=2.0.2, base ^>=4.18.3.0, process ^>= 1.6.19.0, scotty
 
     -- Directories containing source files.
     hs-source-dirs:   src
 
     -- Base language which the package is written in.
     default-language: Haskell2010
+    ghc-options:
+        -threaded
