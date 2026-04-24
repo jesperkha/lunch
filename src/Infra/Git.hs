@@ -1,12 +1,11 @@
 module Infra.Git (newGitRepo) where
 
-import Control.Exception (IOException, try)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
 import Domain.Model (AppError (..))
 import Domain.Port (GitRepo (..), Logger (..))
+import Pkg.Cmd (liftCmd)
 import System.Directory (doesPathExist)
-import System.Process (callProcess)
 
 newGitRepo :: Logger -> GitRepo
 newGitRepo logger =
@@ -17,9 +16,9 @@ newGitRepo logger =
           then lift $ logInfo logger "Project exists. Skipping clone."
           else do
             lift $ logInfo logger $ "Cloning " <> url <> " into " <> path <> "..."
-            result <- lift (try (callProcess "git" ["clone", "https://" <> url, path]) :: IO (Either IOException ()))
+            result <- liftCmd "git" ["clone", "https://" <> url, path]
             case result of
               Left err -> do
-                throwE (GitError $ "Git clone failed" <> show err)
+                throwE $ GitError $ "Git clone failed" <> show err
               Right _ -> pure ()
     }
