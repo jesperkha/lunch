@@ -1,9 +1,10 @@
 module Domain.Usecase (deploy, list, up) where
 
+import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.Except (ExceptT)
 import Data.List.Split (splitOn)
 import Domain.Model (AppError, ProjectName, ProjectUrl)
-import Domain.Port (DockerRepo (buildProject), Env (..), GitRepo (..))
+import Domain.Port (DockerRepo (buildProject), Env (..), FsRepo (..), GitRepo (..))
 import System.FilePath (takeBaseName, (</>))
 
 workDir :: FilePath
@@ -21,7 +22,9 @@ deploy env url = do
 
 -- | List downloaded projects
 list :: Env -> ExceptT AppError IO ()
-list env = pure ()
+list env = do
+  projects <- readDir (envFs env) workDir
+  lift $ mapM_ putStrLn projects
 
 -- | Start the docker container for the given project
 up :: Env -> ProjectName -> ExceptT AppError IO ()

@@ -28,6 +28,7 @@ commandParser =
         <> command "update" (cmdInfo Update "NAME" "Update a project")
         <> command "up" (cmdInfo Up "NAME" "Start a project container")
         <> command "down" (cmdInfo Down "NAME" "Stop a project container")
+        <> command "list" (info (pure List) (progDesc "List all downloaded projects"))
     )
 
 -- Execute command parser on input

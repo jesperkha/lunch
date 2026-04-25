@@ -71,6 +71,7 @@ executable lunch
         Infra.Git
         Domain.Usecase
         Infra.Docker
+        Infra.Fs
         Pkg.Cmd
 
     -- LANGUAGE extensions used by modules in this package.

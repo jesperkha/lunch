@@ -1,4 +1,4 @@
-module Domain.Port (Logger (..), GitRepo (..), DockerRepo (..), Env (..)) where
+module Domain.Port (Logger (..), GitRepo (..), DockerRepo (..), Env (..), FsRepo (..)) where
 
 import Control.Monad.Trans.Except (ExceptT)
 import Domain.Model (AppError, ProjectUrl)
@@ -8,7 +8,8 @@ data Env
   = Env
   { envLogger :: Logger,
     envGitRepo :: GitRepo,
-    envDockerRepo :: DockerRepo
+    envDockerRepo :: DockerRepo,
+    envFs :: FsRepo
   }
 
 -- | Logger is a simple interface for printing out formatted strings
@@ -26,4 +27,9 @@ newtype GitRepo = GitRepo
 -- | DockerRepo handles actions related to building and running docker images and compose
 newtype DockerRepo = DockerRepo
   { buildProject :: FilePath -> ExceptT AppError IO ()
+  }
+
+-- | FsRepo handles file system related actions
+newtype FsRepo = FsRepo
+  { readDir :: FilePath -> ExceptT AppError IO [FilePath]
   }
