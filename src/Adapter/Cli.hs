@@ -5,7 +5,7 @@ import Control.Exception (IOException, try)
 import Control.Monad.Trans.Except (runExceptT)
 import Domain.Model (AppError, ProjectName, ProjectUrl, Result)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy, list, remove)
+import Domain.Usecase (deploy, down, list, remove, up)
 import Options.Applicative
 import System.Exit (exitFailure)
 
@@ -58,9 +58,9 @@ runCli :: Env -> IO ()
 runCli env = do
   c <- mainParser
   case c of
-    Deploy url -> do runCommand env (deploy env url)
-    List -> do runCommand env (list env)
-    Remove name -> do runCommand env (remove env name)
+    Deploy url -> runCommand env (deploy env url)
+    List -> runCommand env (list env)
+    Remove name -> runCommand env (remove env name)
+    Up name -> runCommand env (up env name)
+    Down name -> runCommand env (down env name)
     Update _ -> pure ()
-    Up _ -> pure ()
-    Down _ -> pure ()

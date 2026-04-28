@@ -24,8 +24,10 @@ newtype GitRepo = GitRepo
   }
 
 -- | DockerRepo handles actions related to building and running docker images and compose
-newtype DockerRepo = DockerRepo
-  { buildProject :: FilePath -> Result ()
+data DockerRepo = DockerRepo
+  { buildProject :: FilePath -> Result (),
+    composeUp :: FilePath -> Result (),
+    composeDown :: FilePath -> Result ()
   }
 
 -- TODO: rename FsRepo -> ProjectRepo

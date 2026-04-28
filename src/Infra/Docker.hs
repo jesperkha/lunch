@@ -32,6 +32,24 @@ newDockerRepo logger =
         case result of
           Left err -> do
             lift $ logError logger (show err)
-            throwE (DockerError "docker build failed")
+            throwE (DockerError "Docker build failed")
+          Right _ -> pure (),
+      composeUp = \dir -> do
+        checkDockerFiles dir
+        lift $ logInfo logger ("Starting " <> takeBaseName dir <> "...")
+        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "up", "-d"]
+        case result of
+          Left err -> do
+            lift $ logError logger (show err)
+            throwE (DockerError "Docker compose up failed")
+          Right _ -> pure (),
+      composeDown = \dir -> do
+        checkDockerFiles dir
+        lift $ logInfo logger ("Starting " <> takeBaseName dir <> "...")
+        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "down"]
+        case result of
+          Left err -> do
+            lift $ logError logger (show err)
+            throwE (DockerError "Docker compose down failed")
           Right _ -> pure ()
     }
