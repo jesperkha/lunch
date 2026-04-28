@@ -1,8 +1,8 @@
 module Adapter.Cli (runCli) where
 
 import Bootstrap (Env (..))
-import Control.Monad.Trans.Except (ExceptT, runExceptT)
-import Domain.Model (AppError)
+import Control.Monad.Trans.Except (runExceptT)
+import Domain.Model (Result)
 import Domain.Port (Logger (..))
 import Domain.Usecase (deploy, list)
 import Options.Applicative
@@ -36,7 +36,7 @@ mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
 -- Run given domain function. Prints and exits on error.
-runCommand :: Env -> ExceptT AppError IO () -> IO ()
+runCommand :: Env -> Result () -> IO ()
 runCommand env f = do
   result <- runExceptT f
   case result of

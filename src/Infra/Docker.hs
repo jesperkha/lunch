@@ -1,20 +1,20 @@
 module Infra.Docker (newDockerRepo) where
 
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Except (ExceptT, throwE)
-import Domain.Model (AppError (..))
+import Control.Monad.Trans.Except (throwE)
+import Domain.Model (AppError (..), Result)
 import Domain.Port (DockerRepo (..), Logger (..))
 import Pkg.Cmd (liftCmd)
 import System.Directory (doesFileExist)
 import System.FilePath (takeBaseName)
 import System.FilePath.Posix ((</>))
 
-checkDockerFiles :: FilePath -> ExceptT AppError IO ()
+checkDockerFiles :: FilePath -> Result ()
 checkDockerFiles path = do
   fileMustExist (path </> "Dockerfile") "Missing Dockerfile"
   fileMustExist (path </> "docker-compose.yml") "Missing docker-compose.yml"
 
-fileMustExist :: FilePath -> String -> ExceptT AppError IO ()
+fileMustExist :: FilePath -> String -> Result ()
 fileMustExist path msg = do
   exists <- lift $ doesFileExist path
   if exists

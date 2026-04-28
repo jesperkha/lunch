@@ -1,7 +1,6 @@
 module Domain.Port (Logger (..), GitRepo (..), DockerRepo (..), Env (..), FsRepo (..)) where
 
-import Control.Monad.Trans.Except (ExceptT)
-import Domain.Model (AppError, ProjectUrl)
+import Domain.Model (ProjectUrl, Result)
 
 -- | Env is the collection of ports used by domain usecases and service
 data Env
@@ -21,15 +20,15 @@ data Logger = Logger
 
 -- | GitRepo handles actions related to git
 newtype GitRepo = GitRepo
-  { cloneRepo :: ProjectUrl -> FilePath -> ExceptT AppError IO ()
+  { cloneRepo :: ProjectUrl -> FilePath -> Result ()
   }
 
 -- | DockerRepo handles actions related to building and running docker images and compose
 newtype DockerRepo = DockerRepo
-  { buildProject :: FilePath -> ExceptT AppError IO ()
+  { buildProject :: FilePath -> Result ()
   }
 
 -- | FsRepo handles file system related actions
 newtype FsRepo = FsRepo
-  { readDir :: FilePath -> ExceptT AppError IO [FilePath]
+  { readDir :: FilePath -> Result [FilePath]
   }
