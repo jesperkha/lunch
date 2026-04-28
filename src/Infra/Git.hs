@@ -4,7 +4,7 @@ import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
 import Domain.Model (AppError (..))
 import Domain.Port (GitRepo (..), Logger (..))
-import Pkg.Cmd (liftCmd)
+import Pkg.IO (tryCmd)
 import System.Directory (doesPathExist)
 
 newGitRepo :: Logger -> GitRepo
@@ -16,7 +16,7 @@ newGitRepo logger =
           then lift $ logInfo logger "Project exists. Skipping clone."
           else do
             lift $ logInfo logger $ "Cloning " <> url <> " into " <> path <> "..."
-            result <- liftCmd "git" ["clone", "https://" <> url, path]
+            result <- tryCmd "git" ["clone", "https://" <> url, path]
             case result of
               Left err -> do
                 throwE $ GitError $ "Git clone failed" <> show err

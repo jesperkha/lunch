@@ -1,18 +1,20 @@
 module Adapter.Cli (runCli) where
 
 import Bootstrap (Env (..))
+import Control.Exception (IOException, try)
 import Control.Monad.Trans.Except (runExceptT)
-import Domain.Model (Result)
+import Domain.Model (AppError, ProjectName, ProjectUrl, Result)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy, list)
+import Domain.Usecase (deploy, list, remove)
 import Options.Applicative
 import System.Exit (exitFailure)
 
 data Command
-  = Deploy String
-  | Update String
-  | Up String
-  | Down String
+  = Deploy ProjectUrl
+  | Update ProjectName
+  | Up ProjectName
+  | Down ProjectName
+  | Remove ProjectName
   | List
   deriving (Show)
 
@@ -28,6 +30,7 @@ commandParser =
         <> command "update" (cmdInfo Update "NAME" "Update a project")
         <> command "up" (cmdInfo Up "NAME" "Start a project container")
         <> command "down" (cmdInfo Down "NAME" "Stop a project container")
+        <> command "remove" (cmdInfo Remove "NAME" "Remove a project")
         <> command "list" (info (pure List) (progDesc "List all downloaded projects"))
     )
 
@@ -38,12 +41,18 @@ mainParser = execParser (info commandParser (progDesc "Lunch"))
 -- Run given domain function. Prints and exits on error.
 runCommand :: Env -> Result () -> IO ()
 runCommand env f = do
-  result <- runExceptT f
+  result <- try (runExceptT f) :: IO (Either IOException (Either AppError ()))
   case result of
-    Left err -> do
-      logError (envLogger env) (show err)
+    -- IO error
+    Left ioErr -> do
+      logError (envLogger env) (show ioErr)
       exitFailure
-    Right _ -> pure ()
+    -- Application error
+    Right (Left appErr) -> do
+      logError (envLogger env) (show appErr)
+      exitFailure
+    -- No error
+    Right (Right _) -> pure ()
 
 runCli :: Env -> IO ()
 runCli env = do
@@ -51,6 +60,7 @@ runCli env = do
   case c of
     Deploy url -> do runCommand env (deploy env url)
     List -> do runCommand env (list env)
+    Remove name -> do runCommand env (remove env name)
     Update _ -> pure ()
     Up _ -> pure ()
     Down _ -> pure ()

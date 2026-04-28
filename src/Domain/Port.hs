@@ -28,7 +28,10 @@ newtype DockerRepo = DockerRepo
   { buildProject :: FilePath -> Result ()
   }
 
+-- TODO: rename FsRepo -> ProjectRepo
+
 -- | FsRepo handles file system related actions
-newtype FsRepo = FsRepo
-  { readDir :: FilePath -> Result [FilePath]
+data FsRepo = FsRepo
+  { readDir :: FilePath -> Result [FilePath],
+    removeDir :: FilePath -> Result ()
   }

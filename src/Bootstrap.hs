@@ -11,7 +11,7 @@ bootstrap = do
   let logger = newLogger
   let gitRepo = newGitRepo logger
   let dockerRepo = newDockerRepo logger
-  let fsRepo = newFsRepo
+  let fsRepo = newFsRepo logger
   pure
     Env
       { envLogger = logger,

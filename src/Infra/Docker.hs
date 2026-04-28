@@ -4,7 +4,7 @@ import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
 import Domain.Model (AppError (..), Result)
 import Domain.Port (DockerRepo (..), Logger (..))
-import Pkg.Cmd (liftCmd)
+import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
 import System.FilePath (takeBaseName)
 import System.FilePath.Posix ((</>))
@@ -28,7 +28,7 @@ newDockerRepo logger =
     { buildProject = \dir -> do
         checkDockerFiles dir
         lift $ logInfo logger ("Building Docker image for " <> takeBaseName dir <> "...")
-        result <- liftCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "--build", "-d"]
+        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "--build", "-d"]
         case result of
           Left err -> do
             lift $ logError logger (show err)

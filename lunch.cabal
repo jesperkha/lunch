@@ -72,7 +72,7 @@ executable lunch
         Domain.Usecase
         Infra.Docker
         Infra.Fs
-        Pkg.Cmd
+        Pkg.IO
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

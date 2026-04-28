@@ -9,5 +9,5 @@ type ProjectName = String
 -- | Result t is a type alias for an ExceptT wrapping AppError and IO t.
 type Result t = ExceptT AppError IO t
 
-data AppError = GitError String | DockerError String | ConfigError String
+data AppError = GitError String | DockerError String | ConfigError String | IOError String | FsError String
   deriving (Show)
