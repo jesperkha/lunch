@@ -1,13 +1,13 @@
 module Infra.Docker (newDockerRepo) where
 
+import Control.Monad (unless)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
 import Domain.Model (AppError (..), Result)
 import Domain.Port (DockerRepo (..), Logger (..))
 import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
-import System.FilePath (takeBaseName)
-import System.FilePath.Posix ((</>))
+import System.FilePath (takeBaseName, (</>))
 
 checkDockerFiles :: FilePath -> Result ()
 checkDockerFiles path = do
@@ -17,39 +17,23 @@ checkDockerFiles path = do
 fileMustExist :: FilePath -> String -> Result ()
 fileMustExist path msg = do
   exists <- lift $ doesFileExist path
-  if exists
-    then pure ()
-    else do
-      throwE (ConfigError msg)
+  unless exists $ throwE (ConfigError msg)
+
+runCompose :: Logger -> String -> AppError -> [String] -> FilePath -> Result ()
+runCompose logger msg err args dir = do
+  checkDockerFiles dir
+  lift $ logInfo logger (msg <> takeBaseName dir <> "...")
+  result <- tryCmd "docker" (["compose", "-f", dir </> "docker-compose.yml"] <> args)
+  case result of
+    Left e -> do
+      lift (logError logger (show e))
+      throwE err
+    Right _ -> pure ()
 
 newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
   DockerRepo
-    { buildProject = \dir -> do
-        checkDockerFiles dir
-        lift $ logInfo logger ("Building Docker image for " <> takeBaseName dir <> "...")
-        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "up", "--build", "-d"]
-        case result of
-          Left err -> do
-            lift $ logError logger (show err)
-            throwE (DockerError "Docker build failed")
-          Right _ -> pure (),
-      composeUp = \dir -> do
-        checkDockerFiles dir
-        lift $ logInfo logger ("Starting " <> takeBaseName dir <> "...")
-        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "up", "-d"]
-        case result of
-          Left err -> do
-            lift $ logError logger (show err)
-            throwE (DockerError "Docker compose up failed")
-          Right _ -> pure (),
-      composeDown = \dir -> do
-        checkDockerFiles dir
-        lift $ logInfo logger ("Starting " <> takeBaseName dir <> "...")
-        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "down"]
-        case result of
-          Left err -> do
-            lift $ logError logger (show err)
-            throwE (DockerError "Docker compose down failed")
-          Right _ -> pure ()
+    { buildProject = runCompose logger "Building Docker image for " (DockerError "Docker build failed") ["up", "--build", "-d"],
+      composeUp = runCompose logger "Starting " (DockerError "Docker compose up failed") ["up", "-d"],
+      composeDown = runCompose logger "Stopping " (DockerError "Docker compose down failed") ["down"]
     }
