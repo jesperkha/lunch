@@ -9,18 +9,22 @@ import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
 import System.FilePath (takeBaseName, (</>))
 
+-- | Assert that both Dockerfile and docker-compose.yml exist in @path@.
 checkDockerFiles :: FilePath -> Result ()
 checkDockerFiles path = do
   fileMustExist (path </> "Dockerfile") "Missing Dockerfile"
   fileMustExist (path </> "docker-compose.yml") "Missing docker-compose.yml"
 
+-- | Asserts that @file@ exists, returning @error message@ if not.
 fileMustExist :: FilePath -> String -> Result ()
 fileMustExist path msg = do
   exists <- lift $ doesFileExist path
   unless exists $ throwE (ConfigError msg)
 
-runCompose :: Logger -> String -> AppError -> [String] -> FilePath -> Result ()
-runCompose logger msg err args dir = do
+-- | Run compose using @logger@ to print @info@.
+-- Runs command with @args@ and returns @error@ on failure.
+runCompose :: Logger -> String -> [String] -> AppError -> FilePath -> Result ()
+runCompose logger msg args err dir = do
   checkDockerFiles dir
   lift $ logInfo logger (msg <> takeBaseName dir <> "...")
   result <- tryCmd "docker" (["compose", "-f", dir </> "docker-compose.yml"] <> args)
@@ -33,7 +37,7 @@ runCompose logger msg err args dir = do
 newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
   DockerRepo
-    { buildProject = runCompose logger "Building Docker image for " (DockerError "Docker build failed") ["up", "--build", "-d"],
-      composeUp = runCompose logger "Starting " (DockerError "Docker compose up failed") ["up", "-d"],
-      composeDown = runCompose logger "Stopping " (DockerError "Docker compose down failed") ["down"]
+    { buildProject = runCompose logger "Building Docker image for " ["up", "--build", "-d"] (DockerError "Docker build failed"),
+      composeUp = runCompose logger "Starting " ["up", "-d"] (DockerError "Docker compose up failed"),
+      composeDown = runCompose logger "Stopping " ["down"] (DockerError "Docker compose down failed")
     }

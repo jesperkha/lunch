@@ -45,7 +45,7 @@ down env project = do
 remove :: Env -> ProjectName -> Result ()
 remove env project = do
   checkProjectExists project
-  confirm <- lift $ promptYesNo ("Are you sure you want to remove " <> project <> "?")
+  confirm <- lift $ promptYesNo ("Are you sure you want to remove " <> project <> "?") False
   let projectPath = projectDir project
   (if confirm then removeDir (envFs env) projectPath else lift $ putStrLn "Aborting")
 

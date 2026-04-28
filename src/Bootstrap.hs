@@ -6,6 +6,7 @@ import Infra.Fs (newFsRepo)
 import Infra.Git (newGitRepo)
 import Infra.Logger (newLogger)
 
+-- | Bootstrap all dependencies
 bootstrap :: IO Env
 bootstrap = do
   let logger = newLogger

@@ -20,20 +20,24 @@ data Logger = Logger
 
 -- | GitRepo handles actions related to git
 newtype GitRepo = GitRepo
-  { cloneRepo :: ProjectUrl -> FilePath -> Result ()
+  { -- | Clone a @github url@ into local @filepath@.
+    cloneRepo :: ProjectUrl -> FilePath -> Result ()
   }
 
--- | DockerRepo handles actions related to building and running docker images and compose
+-- | DockerRepo handles actions related to building and running docker images and compose.
 data DockerRepo = DockerRepo
-  { buildProject :: FilePath -> Result (),
+  { -- | Run docker compose up in @path@ with build flag.
+    buildProject :: FilePath -> Result (),
+    -- | Run docker compose up in @path@.
     composeUp :: FilePath -> Result (),
+    -- | Run docker compose down in @path@.
     composeDown :: FilePath -> Result ()
   }
 
--- TODO: rename FsRepo -> ProjectRepo
-
 -- | FsRepo handles file system related actions
 data FsRepo = FsRepo
-  { readDir :: FilePath -> Result [FilePath],
+  { -- | Read contents of a @path@.
+    readDir :: FilePath -> Result [FilePath],
+    -- | Delete a @directory@ recursively.
     removeDir :: FilePath -> Result ()
   }

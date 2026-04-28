@@ -20,11 +20,10 @@ data Command
   | List
   deriving (Show)
 
--- Command info for command variant. [arg name] -> [description]
+-- | Give @command variant@ an @argument name@ and @description@.
 cmdInfo :: (String -> Command) -> String -> String -> ParserInfo Command
 cmdInfo c name desc = info (c <$> argument str (metavar name)) (progDesc desc)
 
--- Subcommand parser
 commandParser :: Parser Command
 commandParser =
   hsubparser
@@ -40,8 +39,10 @@ commandParser =
 mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
--- Run given domain function. Prints and exits on error.
-runCommand :: forall t. (Show t) => Env -> Result t -> IO ()
+-- | Run domain function returning type t.
+-- On error log error and exit with failure.
+-- On success return result value
+runCommand :: forall t. (Show t) => Env -> Result t -> IO t
 runCommand env f = do
   result <- try (runExceptT f) :: IO (Either IOException (Either AppError t))
   case result of
@@ -54,14 +55,17 @@ runCommand env f = do
       logError (envLogger env) (show appErr)
       exitFailure
     -- No error
-    Right (Right _) -> pure ()
+    Right (Right v) -> pure v
 
+-- | Run the CLI adapter
 runCli :: Env -> IO ()
 runCli env = do
   c <- mainParser
   case c of
     Deploy url -> runCommand env (deploy env url)
-    List -> runCommand env (list env)
+    List -> do
+      projects <- runCommand env (list env)
+      mapM_ putStrLn projects
     Remove name -> runCommand env (remove env name)
     Up name -> runCommand env (up env name)
     Down name -> runCommand env (down env name)

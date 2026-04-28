@@ -9,14 +9,20 @@ import Domain.Model (AppError (IOError), Result)
 import System.IO (hFlush, stdout)
 import System.Process (callProcess)
 
-promptYesNo :: String -> IO Bool
-promptYesNo msg = do
-  putStr $ msg <> " (y/N): "
+-- | Print a @message@ to the terminal and await user input.
+-- Accepts a @default@ selected option (yes/no).
+promptYesNo :: String -> Bool -> IO Bool
+promptYesNo msg defaultSelect = do
+  putStr $ msg <> (if defaultSelect then " (Y/n): " else " (y/N): ")
   hFlush stdout
   response <- getLine
-  return $ response `elem` ["y", "Y"]
+  pure
+    ( if defaultSelect
+        then response `notElem` ["n", "N"]
+        else response `elem` ["y", "Y"]
+    )
 
--- | Try IO action and convert IO exception message to a domain IOError.
+-- | Try IO action and convert IO exception message to domain IOError.
 tryIO :: forall t. IO t -> Result (Either AppError t)
 tryIO f = lift $ do
   result <- try f :: IO (Either IOException t)

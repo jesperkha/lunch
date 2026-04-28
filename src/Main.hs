@@ -1,10 +1,9 @@
 module Main where
 
--- import Adapter.Cli (runCli)
-import Adapter.Http (runHttp)
+import Adapter.Cli (runCli)
 import Bootstrap (bootstrap)
 
 main :: IO ()
 main = do
   env <- bootstrap
-  runHttp env
+  runCli env

@@ -27,6 +27,7 @@ runHandler env s f = do
 logRequest :: Logger -> String -> String -> ActionM ()
 logRequest logger method url = liftIO $ logInfo logger (method <> " " <> url)
 
+-- | Run the HTTP adapter
 runHttp :: Env -> IO ()
 runHttp env = scotty 8080 $ do
   let logger = envLogger env
