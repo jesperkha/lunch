@@ -26,7 +26,7 @@ runCompose logger msg err args dir = do
   result <- tryCmd "docker" (["compose", "-f", dir </> "docker-compose.yml"] <> args)
   case result of
     Left e -> do
-      lift (logError logger (show e))
+      lift $ logError logger (show e)
       throwE err
     Right _ -> pure ()
 

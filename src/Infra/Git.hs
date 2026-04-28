@@ -15,10 +15,10 @@ newGitRepo logger =
         if exists
           then lift $ logInfo logger "Project exists. Skipping clone."
           else do
-            lift $ logInfo logger $ "Cloning " <> url <> " into " <> path <> "..."
+            lift $ logInfo logger ("Cloning " <> url <> " into " <> path <> "...")
             result <- tryCmd "git" ["clone", "https://" <> url, path]
             case result of
               Left err -> do
-                throwE $ GitError $ "Git clone failed" <> show err
+                throwE $ GitError ("Git clone failed" <> show err)
               Right _ -> pure ()
     }

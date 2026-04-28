@@ -21,7 +21,7 @@ tryIO :: forall t. IO t -> Result (Either AppError t)
 tryIO f = lift $ do
   result <- try f :: IO (Either IOException t)
   case result of
-    Left err -> pure $ Left $ IOError $ show err
+    Left err -> pure $ Left $ IOError (show err)
     Right tt -> pure $ Right tt
 
 -- | Try to run shell command and convert IO exception to domain IOError.
