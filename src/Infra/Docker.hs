@@ -28,7 +28,7 @@ newDockerRepo logger =
     { buildProject = \dir -> do
         checkDockerFiles dir
         lift $ logInfo logger ("Building Docker image for " <> takeBaseName dir <> "...")
-        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "--build", "-d"]
+        result <- tryCmd "docker" ["compose", "-f", dir <> "/docker-compose.yml", "up", "--build", "-d"]
         case result of
           Left err -> do
             lift $ logError logger (show err)
