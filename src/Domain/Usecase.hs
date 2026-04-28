@@ -1,4 +1,4 @@
-module Domain.Usecase (deploy, list, up, down, remove) where
+module Domain.Usecase (deploy, fetch, list, up, down, remove) where
 
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.Except (throwE)
@@ -24,6 +24,12 @@ deploy env url = do
   let outDir = projectDir $ projectName url
   cloneRepo (envGitRepo env) url outDir
   buildProject (envDockerRepo env) outDir
+
+-- | Pull project
+fetch :: Env -> ProjectUrl -> Result ()
+fetch env url = do
+  let outDir = projectDir $ projectName url
+  cloneRepo (envGitRepo env) url outDir
 
 -- | List downloaded projects
 list :: Env -> Result [ProjectName]

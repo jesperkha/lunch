@@ -7,7 +7,7 @@ import Control.Monad.Trans.Except (runExceptT)
 import Data.Text.Lazy (Text, pack, unpack)
 import Domain.Model (Result)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy, down, list, up)
+import Domain.Usecase (deploy, down, fetch, list, up)
 import Network.HTTP.Types.Status (Status, status200, status500)
 import Web.Scotty
 
@@ -39,6 +39,11 @@ runHttp env = scotty 8080 $ do
     url <- queryParam "url" :: ActionM Text
     logRequest logger "POST" ("/deploy?url=" <> show url)
     runHandler env (status200, status500) (deploy env (unpack url))
+
+  post "/fetch" $ do
+    url <- queryParam "url" :: ActionM Text
+    logRequest logger "POST" ("/fetch?url=" <> show url)
+    runHandler env (status200, status500) (fetch env (unpack url))
 
   get "/list" $ do
     logRequest logger "GET" "/list"
