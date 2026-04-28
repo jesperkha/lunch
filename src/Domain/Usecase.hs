@@ -26,10 +26,8 @@ deploy env url = do
   buildProject (envDockerRepo env) outDir
 
 -- | List downloaded projects
-list :: Env -> Result ()
-list env = do
-  projects <- readDir (envFs env) workDir
-  lift $ mapM_ putStrLn projects
+list :: Env -> Result [ProjectName]
+list env = readDir (envFs env) workDir
 
 -- | Start the docker container for the given project
 up :: Env -> ProjectName -> Result ()

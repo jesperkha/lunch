@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Adapter.Cli (runCli) where
 
 import Bootstrap (Env (..))
@@ -39,9 +41,9 @@ mainParser :: IO Command
 mainParser = execParser (info commandParser (progDesc "Lunch"))
 
 -- Run given domain function. Prints and exits on error.
-runCommand :: Env -> Result () -> IO ()
+runCommand :: forall t. (Show t) => Env -> Result t -> IO ()
 runCommand env f = do
-  result <- try (runExceptT f) :: IO (Either IOException (Either AppError ()))
+  result <- try (runExceptT f) :: IO (Either IOException (Either AppError t))
   case result of
     -- IO error
     Left ioErr -> do
