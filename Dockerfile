@@ -19,5 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY --from=builder /app/lunch-bin /app/lunch
 
+ENV ADAPTER=http
+
 EXPOSE 8080
 CMD ["/app/lunch"]
