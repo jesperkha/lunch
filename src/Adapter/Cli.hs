@@ -7,7 +7,7 @@ import Control.Exception (IOException, try)
 import Control.Monad.Trans.Except (runExceptT)
 import Domain.Model (AppError, ProjectName, ProjectUrl, Result)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy, down, fetch, list, remove, up)
+import Domain.Usecase (deploy, down, fetch, list, remove, up, update)
 import Options.Applicative
 import System.Exit (exitFailure)
 
@@ -17,6 +17,7 @@ data Command
   | Up ProjectName -- Start project
   | Down ProjectName -- Stop project
   | Remove ProjectName -- Remove project
+  | Update ProjectName -- Pull changes
   | List -- List projects
   deriving (Show)
 
@@ -32,6 +33,7 @@ commandParser =
         <> command "up" (cmdInfo Up "NAME" "Start a project container")
         <> command "down" (cmdInfo Down "NAME" "Stop a project container")
         <> command "remove" (cmdInfo Remove "NAME" "Remove a project")
+        <> command "update" (cmdInfo Update "NAME" "Pull latest changes")
         <> command "list" (info (pure List) (progDesc "List all downloaded projects"))
     )
 
@@ -68,5 +70,6 @@ runCli env = do
       projects <- runCommand env (list env)
       mapM_ putStrLn projects
     Remove name -> runCommand env (remove env name)
+    Update name -> runCommand env (update env name)
     Up name -> runCommand env (up env name)
     Down name -> runCommand env (down env name)

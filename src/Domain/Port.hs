@@ -19,9 +19,11 @@ data Logger = Logger
   }
 
 -- | GitRepo handles actions related to git
-newtype GitRepo = GitRepo
+data GitRepo = GitRepo
   { -- | Clone a @github url@ into local @filepath@.
-    cloneRepo :: ProjectUrl -> FilePath -> Result ()
+    cloneRepo :: ProjectUrl -> FilePath -> Result (),
+    -- | Pull the latest changes from a project
+    pullRepo :: FilePath -> Result ()
   }
 
 -- | DockerRepo handles actions related to building and running docker images and compose.

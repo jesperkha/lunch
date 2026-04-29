@@ -20,5 +20,12 @@ newGitRepo logger =
             case result of
               Left err -> do
                 throwE $ GitError ("Git clone failed" <> show err)
-              Right _ -> pure ()
+              Right _ -> pure (),
+      pullRepo = \path -> do
+        lift $ logInfo logger ("Pulling latest in " <> path <> "...")
+        result <- tryCmd "git" ["-C", path, "pull"]
+        case result of
+          Left err -> do
+            throwE $ GitError ("Git pull failed" <> show err)
+          Right _ -> pure ()
     }
