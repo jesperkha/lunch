@@ -30,8 +30,6 @@ data GitRepo = GitRepo
 data DockerRepo = DockerRepo
   { -- | Run docker compose up in @path@ with build flag.
     buildProject :: FilePath -> Result (),
-    -- | Run docker compose up in @path@.
-    composeUp :: FilePath -> Result (),
     -- | Run docker compose down in @path@.
     composeDown :: FilePath -> Result ()
   }

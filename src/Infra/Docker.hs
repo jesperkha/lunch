@@ -38,6 +38,5 @@ newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
   DockerRepo
     { buildProject = runCompose logger "Building Docker image for " ["up", "--build", "-d"] (DockerError "Docker build failed"),
-      composeUp = runCompose logger "Starting " ["up", "-d"] (DockerError "Docker compose up failed"),
       composeDown = runCompose logger "Stopping " ["down"] (DockerError "Docker compose down failed")
     }

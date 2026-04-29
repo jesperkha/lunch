@@ -46,7 +46,7 @@ list env = readDir (envFs env) workDir
 up :: Env -> ProjectName -> Result ()
 up env project = do
   checkProjectExists project
-  composeUp (envDockerRepo env) (projectDir project)
+  buildProject (envDockerRepo env) (projectDir project)
 
 -- | Stop the docker container for the given project
 down :: Env -> ProjectName -> Result ()
