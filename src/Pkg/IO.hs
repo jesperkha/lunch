@@ -7,7 +7,7 @@ import Control.Exception.Base (try)
 import Control.Monad.Trans.Class (MonadTrans (..))
 import Domain.Model (AppError (IOError), Result)
 import System.IO (hFlush, stdout)
-import System.Process (callProcess)
+import System.Process (readProcess)
 
 -- | Print a @message@ to the terminal and await user input.
 -- Accepts a @default@ selected option (yes/no).
@@ -31,5 +31,6 @@ tryIO f = lift $ do
     Right tt -> pure $ Right tt
 
 -- | Try to run shell command and convert IO exception to domain IOError.
-tryCmd :: String -> [String] -> Result (Either AppError ())
-tryCmd name args = tryIO (callProcess name args)
+-- Returns process output
+tryCmd :: String -> [String] -> Result (Either AppError String)
+tryCmd name args = tryIO (readProcess name args "")

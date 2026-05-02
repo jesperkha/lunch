@@ -1,6 +1,6 @@
 module Domain.Port (Logger (..), GitRepo (..), DockerRepo (..), Env (..), FsRepo (..)) where
 
-import Domain.Model (ProjectUrl, Result)
+import Domain.Model (AppInfo, ContainerInfo, ProjectUrl, Result)
 
 -- | Env is the collection of ports used by domain usecases and service
 data Env
@@ -31,7 +31,11 @@ data DockerRepo = DockerRepo
   { -- | Run docker compose up in @path@ with build flag.
     buildProject :: FilePath -> Result (),
     -- | Run docker compose down in @path@.
-    composeDown :: FilePath -> Result ()
+    composeDown :: FilePath -> Result (),
+    -- | Get container ID. None if container is not running.
+    getCid :: FilePath -> Result (Maybe String),
+    -- | Get container info for a given container id.
+    getInfo :: String -> Result AppInfo
   }
 
 -- | FsRepo handles file system related actions

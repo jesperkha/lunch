@@ -5,9 +5,10 @@ module Adapter.Cli (runCli) where
 import Bootstrap (Env (..))
 import Control.Exception (IOException, try)
 import Control.Monad.Trans.Except (runExceptT)
-import Domain.Model (AppError, ProjectName, ProjectUrl, Result)
+import Data.List (intercalate)
+import Domain.Model (AppError, AppInfo (infoService, infoStatus), ProjectName, ProjectUrl, Result)
 import Domain.Port (Logger (..))
-import Domain.Usecase (deploy, down, fetch, list, remove, up, update)
+import Domain.Usecase (deploy, down, fetch, list, remove, status, up, update)
 import Options.Applicative
 import System.Exit (exitFailure)
 
@@ -18,6 +19,7 @@ data Command
   | Down ProjectName -- Stop project
   | Remove ProjectName -- Remove project
   | Update ProjectName -- Pull changes
+  | Status ProjectName -- Get project status
   | List -- List projects
   deriving (Show)
 
@@ -34,6 +36,7 @@ commandParser =
         <> command "down" (cmdInfo Down "NAME" "Stop a project container")
         <> command "remove" (cmdInfo Remove "NAME" "Remove a project")
         <> command "update" (cmdInfo Update "NAME" "Pull latest changes")
+        <> command "status" (cmdInfo Status "NAME" "See project status")
         <> command "list" (info (pure List) (progDesc "List all downloaded projects"))
     )
 
@@ -59,6 +62,16 @@ runCommand env f = do
     -- No error
     Right (Right v) -> pure v
 
+printAppInfo :: AppInfo -> IO ()
+printAppInfo appInfo = do
+  putStrLn "NAME\tSTATUS"
+  putStrLn $
+    intercalate
+      "\t"
+      [ infoService appInfo,
+        show $ infoStatus appInfo
+      ]
+
 -- | Run the CLI adapter
 runCli :: Env -> IO ()
 runCli env = do
@@ -69,6 +82,9 @@ runCli env = do
     List -> do
       projects <- runCommand env (list env)
       mapM_ putStrLn projects
+    Status name -> do
+      appInfo <- runCommand env (status env name)
+      printAppInfo appInfo
     Remove name -> runCommand env (remove env name)
     Update name -> runCommand env (update env name)
     Up name -> runCommand env (up env name)

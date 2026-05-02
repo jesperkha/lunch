@@ -3,7 +3,7 @@ module Infra.Docker (newDockerRepo) where
 import Control.Monad (unless)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
-import Domain.Model (AppError (..), Result)
+import Domain.Model (AppError (..), AppInfo (AppInfo), AppStatus (Running), ContainerInfo, Result)
 import Domain.Port (DockerRepo (..), Logger (..))
 import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
@@ -27,16 +27,36 @@ runCompose :: Logger -> String -> [String] -> AppError -> FilePath -> Result ()
 runCompose logger msg args err dir = do
   checkDockerFiles dir
   lift $ logInfo logger (msg <> takeBaseName dir <> "...")
-  result <- tryCmd "docker" (["compose", "-f", dir </> "docker-compose.yml"] <> args)
+  result <- tryCmd "docker" (["compose", "--project-directory", dir] <> args)
   case result of
     Left e -> do
       lift $ logError logger (show e)
       throwE err
     Right _ -> pure ()
 
+parseInspectJson :: String -> Maybe ContainerInfo
+parseInspectJson raw = Nothing
+
 newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
   DockerRepo
     { buildProject = runCompose logger "Building Docker image for " ["up", "--build", "-d"] (DockerError "Docker build failed"),
-      composeDown = runCompose logger "Stopping " ["down"] (DockerError "Docker compose down failed")
+      composeDown = runCompose logger "Stopping " ["down"] (DockerError "Docker compose down failed"),
+      getCid = \fp -> do
+        result <- tryCmd "docker" ["compose", "--project-directory", fp, "ps", "-q"]
+        case result of
+          Left e -> do
+            lift $ logError logger (show e)
+            throwE (DockerError "Failed to read container id")
+          Right cid -> pure $ if cid == "" then Nothing else Just cid,
+      getInfo = \cid -> do
+        result <- tryCmd "docker" ["inspect", cid]
+        maybeInfo <- case result of
+          Left e -> do
+            lift $ logError logger (show e)
+            throwE (DockerError "Failed to inspect container")
+          Right raw -> pure $ parseInspectJson raw
+        case maybeInfo of
+          Just cinfo -> pure (AppInfo "" Running)
+          Nothing -> throwE $ DockerError "Failed to parse inspect output"
     }

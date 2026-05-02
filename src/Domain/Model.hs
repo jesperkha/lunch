@@ -1,4 +1,4 @@
-module Domain.Model (ProjectUrl, ProjectName, AppError (..), Result) where
+module Domain.Model (ProjectUrl, ProjectName, AppError (..), AppStatus (..), Result, AppInfo (..), ContainerInfo (..)) where
 
 import Control.Monad.Trans.Except (ExceptT)
 
@@ -16,3 +16,17 @@ type Result t = ExceptT AppError IO t
 -- IOError specifically is used to extract IOException messages.
 data AppError = GitError String | DockerError String | ConfigError String | IOError String | FsError String
   deriving (Show)
+
+-- | AppStatus contains current status information for a container.
+data AppInfo = AppInfo
+  { infoService :: String,
+    infoStatus :: AppStatus
+  }
+  deriving (Show)
+
+data AppStatus = Running | Stopped
+  deriving (Show)
+
+data ContainerInfo = ContainerInfo
+  {
+  }

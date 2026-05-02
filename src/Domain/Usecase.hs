@@ -1,9 +1,10 @@
-module Domain.Usecase (deploy, fetch, list, up, down, remove, update) where
+module Domain.Usecase (deploy, fetch, list, up, down, remove, update, status) where
 
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.Except (throwE)
 import Data.List.Split (splitOn)
-import Domain.Model (AppError (IOError), ProjectName, ProjectUrl, Result)
+import Data.Maybe (fromMaybe)
+import Domain.Model (AppError (DockerError, IOError), AppInfo (AppInfo), AppStatus (Running, Stopped), ProjectName, ProjectUrl, Result)
 import Domain.Port (DockerRepo (..), Env (..), FsRepo (..), GitRepo (..))
 import Pkg.IO (promptYesNo, tryIO)
 import System.Directory (doesDirectoryExist)
@@ -61,6 +62,16 @@ remove env project = do
   confirm <- lift $ promptYesNo ("Are you sure you want to remove " <> project <> "?") False
   let projectPath = projectDir project
   (if confirm then removeDir (envFs env) projectPath else lift $ putStrLn "Aborting")
+
+status :: Env -> ProjectName -> Result AppInfo
+status env project = do
+  let dockerRepo = envDockerRepo env
+  checkProjectExists project
+  let projectPath = projectDir project
+  maybeCid <- getCid dockerRepo projectPath
+  case maybeCid of
+    Nothing -> pure $ AppInfo project Stopped
+    Just cid -> getInfo dockerRepo cid
 
 checkProjectExists :: ProjectName -> Result ()
 checkProjectExists name = do
