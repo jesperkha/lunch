@@ -28,7 +28,7 @@ cmdInfo c name desc = info (c <$> argument str (metavar name)) (progDesc desc)
 
 commandParser :: Parser Command
 commandParser =
-  hsubparser
+  subparser
     ( command "deploy" (cmdInfo Deploy "URL" "Fetch and deploy a project")
         <> command "fetch" (cmdInfo Fetch "URL" "Fetch project")
         <> command "up" (cmdInfo Up "NAME" "Start a project container")
@@ -41,7 +41,7 @@ commandParser =
 
 -- Execute command parser on input
 mainParser :: IO Command
-mainParser = execParser (info commandParser (progDesc "Lunch"))
+mainParser = customExecParser (prefs showHelpOnEmpty) (info (helper <*> commandParser) (progDesc "Lunch"))
 
 -- | Run domain function returning type t.
 -- On error log error and exit with failure.
