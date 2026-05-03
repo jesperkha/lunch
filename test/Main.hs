@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad (unless)
+import Data.Maybe (isNothing)
 import Domain.Model (ContainerInfo (..))
 import Domain.Usecase (projectName)
 import Infra.Docker (parseInspectJson)
@@ -33,9 +34,9 @@ main = do
       == Just ContainerInfo {cName = "/myapp", cStatus = "exited", cRunning = False, cImage = "myimage:latest"}
 
   check "parseInspectJson: returns Nothing for empty array" $
-    parseInspectJson "[]" == Nothing
+    isNothing (parseInspectJson "[]")
 
   check "parseInspectJson: returns Nothing for invalid json" $
-    parseInspectJson "not json" == Nothing
+    isNothing (parseInspectJson "not json")
 
   putStrLn "All tests passed."
