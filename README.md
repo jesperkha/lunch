@@ -17,12 +17,18 @@ cabal build
 
 You may need to install an additional `zlib` dev-dependency if it is missing. Look up how to install it with you systems package manager.
 
-### Compose
+### Or with Docker Compose
 
 Build and run the http adapter:
 
 ```sh
 docker compose up --build -d
+```
+
+## Test
+
+```sh
+cabal test
 ```
 
 ## Use
