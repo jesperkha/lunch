@@ -9,7 +9,7 @@ import Data.Aeson (Value, decode, withObject, (.:))
 import Data.Aeson.Types (Parser, parseMaybe)
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import Data.Maybe (listToMaybe)
-import Domain.Model (AppError (..), AppInfo (AppInfo), AppStatus (..), ContainerInfo (..), Result)
+import Domain.Model (AppError (..), AppInfo (AppInfo), AppStatus (..), ContainerInfo (..), Result, throwConfig, throwDocker)
 import Domain.Port (DockerRepo (..), Logger (..))
 import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
@@ -25,7 +25,7 @@ checkDockerFiles path = do
 fileMustExist :: FilePath -> String -> Result ()
 fileMustExist path msg = do
   exists <- lift $ doesFileExist path
-  unless exists $ throwE (ConfigError msg)
+  unless exists $ throwConfig msg
 
 -- | Run compose using @logger@ to print @info@.
 -- Runs command with @args@ and returns @error@ on failure.
@@ -73,16 +73,16 @@ newDockerRepo logger =
         case result of
           Left e -> do
             lift $ logError logger (show e)
-            throwE (DockerError "Failed to read container id")
+            throwDocker "Failed to read container id"
           Right cid -> pure $ if cid == "" then Nothing else Just cid,
       getInfo = \name cid -> do
         result <- tryCmd "docker" ["inspect", cid]
         maybeInfo <- case result of
           Left e -> do
             lift $ logError logger (show e)
-            throwE (DockerError "Failed to inspect container")
+            throwDocker "Failed to inspect container"
           Right raw -> pure $ parseInspectJson raw
         case maybeInfo of
           Just cinfo -> pure (AppInfo name (if cRunning cinfo then Running else Stopped))
-          Nothing -> throwE $ DockerError "Failed to parse inspect output"
+          Nothing -> throwDocker "Failed to parse inspect output"
     }

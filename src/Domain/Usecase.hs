@@ -1,9 +1,8 @@
 module Domain.Usecase (deploy, fetch, list, up, down, remove, update, status) where
 
 import Control.Monad.Trans.Class (MonadTrans (lift))
-import Control.Monad.Trans.Except (throwE)
 import Data.List.Split (splitOn)
-import Domain.Model (AppError (IOError), AppInfo (AppInfo), AppStatus (Stopped), ProjectName, ProjectUrl, Result)
+import Domain.Model (AppInfo (AppInfo), AppStatus (Stopped), ProjectName, ProjectUrl, Result, throwIo)
 import Domain.Port (DockerRepo (..), Env (..), FsRepo (..), GitRepo (..))
 import Pkg.IO (promptYesNo, tryIO)
 import System.Directory (doesDirectoryExist)
@@ -77,4 +76,4 @@ checkProjectExists name = do
   result <- tryIO $ doesDirectoryExist (projectDir name)
   case result of
     Right True -> pure ()
-    _ -> throwE $ IOError ("Project does not exist: " <> name)
+    _ -> throwIo ("Project does not exist: " <> name)

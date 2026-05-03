@@ -1,6 +1,6 @@
-module Domain.Model (ProjectUrl, ProjectName, AppError (..), AppStatus (..), Result, AppInfo (..), ContainerInfo (..)) where
+module Domain.Model (ProjectUrl, ProjectName, AppError (..), AppStatus (..), Result, AppInfo (..), ContainerInfo (..), throwGit, throwDocker, throwConfig, throwFs, throwIo) where
 
-import Control.Monad.Trans.Except (ExceptT)
+import Control.Monad.Trans.Except (ExceptT, throwE)
 
 -- | A project url in the form "github.com\/user\/repo".
 type ProjectUrl = String
@@ -33,3 +33,10 @@ data ContainerInfo = ContainerInfo
     cRunning :: Bool,
     cImage   :: String
   }
+
+throwGit, throwDocker, throwConfig, throwFs, throwIo :: String -> Result a
+throwGit    = throwE . GitError
+throwDocker = throwE . DockerError
+throwConfig = throwE . ConfigError
+throwFs     = throwE . FsError
+throwIo     = throwE . IOError

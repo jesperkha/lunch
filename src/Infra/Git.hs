@@ -1,8 +1,7 @@
 module Infra.Git (newGitRepo) where
 
 import Control.Monad.Trans.Class (lift)
-import Control.Monad.Trans.Except (throwE)
-import Domain.Model (AppError (..))
+import Domain.Model (throwGit)
 import Domain.Port (GitRepo (..), Logger (..))
 import Pkg.IO (tryCmd)
 import System.Directory (doesPathExist)
@@ -19,13 +18,13 @@ newGitRepo logger =
             result <- tryCmd "git" ["clone", "https://" <> url, path]
             case result of
               Left err -> do
-                throwE $ GitError ("Git clone failed" <> show err)
+                throwGit ("Git clone failed" <> show err)
               Right _ -> pure (),
       pullRepo = \path -> do
         lift $ logInfo logger ("Pulling latest in " <> path <> "...")
         result <- tryCmd "git" ["-C", path, "pull"]
         case result of
           Left err -> do
-            throwE $ GitError ("Git pull failed" <> show err)
+            throwGit ("Git pull failed" <> show err)
           Right _ -> pure ()
     }

@@ -1,8 +1,7 @@
 module Infra.Fs (newFsRepo) where
 
 import Control.Monad.Trans.Class (MonadTrans (..))
-import Control.Monad.Trans.Except (throwE)
-import Domain.Model (AppError (..))
+import Domain.Model (throwFs)
 import Domain.Port (FsRepo (..), Logger (logError, logInfo))
 import Pkg.IO (tryIO)
 import System.Directory (listDirectory, removeDirectoryRecursive)
@@ -17,6 +16,6 @@ newFsRepo logger =
         case result of
           Left err -> do
             lift $ logError logger (show err)
-            throwE $ FsError ("Failed to delete directory: " <> project)
+            throwFs ("Failed to delete directory: " <> project)
           Right _ -> pure ()
     }

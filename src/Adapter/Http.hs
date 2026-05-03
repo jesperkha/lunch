@@ -8,6 +8,7 @@ import Data.Text.Lazy (Text, pack, unpack)
 import Domain.Model (Result)
 import Domain.Port (Logger (..))
 import Domain.Usecase (deploy, down, fetch, list, up, update)
+import qualified Domain.Usecase as Usecase
 import Network.HTTP.Types.Status (Status, status200, status500)
 import Web.Scotty
 
@@ -63,3 +64,8 @@ runHttp env = scotty 8080 $ do
     project <- queryParam "project" :: ActionM Text
     logRequest logger "POST" ("/down?project=" <> show project)
     runHandler env (status200, status500) (down env (unpack project))
+
+  get "/status" $ do
+    project <- queryParam "project" :: ActionM Text
+    logRequest logger "GET" ("/status?project=" <> show project)
+    runHandler env (status200, status500) (Usecase.status env (unpack project))
