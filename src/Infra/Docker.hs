@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Infra.Docker (newDockerRepo) where
+module Infra.Docker (newDockerRepo, parseInspectJson) where
 
 import Control.Monad (unless)
 import Control.Monad.Trans.Class (lift)

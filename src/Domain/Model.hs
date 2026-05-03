@@ -35,6 +35,7 @@ data ContainerInfo = ContainerInfo
     cRunning :: Bool,
     cImage :: String
   }
+  deriving (Show, Eq)
 
 throwGit, throwDocker, throwConfig, throwFs, throwIo :: String -> Result a
 throwGit = throwE . GitError

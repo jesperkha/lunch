@@ -1,4 +1,4 @@
-module Domain.Usecase (deploy, fetch, list, up, down, remove, update, status) where
+module Domain.Usecase (deploy, fetch, list, up, down, remove, update, status, projectName) where
 
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Data.List.Split (splitOn)
