@@ -61,6 +61,7 @@ remove env project = do
   let projectPath = projectDir project
   (if confirm then removeDir (envFs env) projectPath else lift $ putStrLn "Aborting")
 
+-- | Get the status of a project
 status :: Env -> ProjectName -> Result AppInfo
 status env project = do
   let dockerRepo = envDockerRepo env

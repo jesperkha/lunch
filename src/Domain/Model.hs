@@ -24,19 +24,21 @@ data AppInfo = AppInfo
   }
   deriving (Show)
 
+-- | AppStatus is a simplified interface over the raw Docker status of a container.
 data AppStatus = Running | Stopped
   deriving (Show)
 
+-- | ContainerInfo is a selective view into the json given by docker inspect.
 data ContainerInfo = ContainerInfo
-  { cName    :: String,
-    cStatus  :: String,
+  { cName :: String,
+    cStatus :: String,
     cRunning :: Bool,
-    cImage   :: String
+    cImage :: String
   }
 
 throwGit, throwDocker, throwConfig, throwFs, throwIo :: String -> Result a
-throwGit    = throwE . GitError
+throwGit = throwE . GitError
 throwDocker = throwE . DockerError
 throwConfig = throwE . ConfigError
-throwFs     = throwE . FsError
-throwIo     = throwE . IOError
+throwFs = throwE . FsError
+throwIo = throwE . IOError

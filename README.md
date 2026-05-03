@@ -15,24 +15,7 @@ Requirements:
 cabal build
 ```
 
-You may need to install an additional `zlib` dev-dependency:
-
-```sh
-# debian/ubuntu
-sudo apt install zlib1g zlib1g-dev
-
-# fedora
-sudo dnf install zlib zlib-devel
-
-# arch
-sudo pacman -S zlib
-
-# alpine
-sudo apk add zlib zlib-dev
-
-# macos
-brew install zlib
-```
+You may need to install an additional `zlib` dev-dependency if it is missing. Look up how to install it with you systems package manager.
 
 ### Compose
 
