@@ -3,8 +3,7 @@ module Domain.Usecase (deploy, fetch, list, up, down, remove, update, status) wh
 import Control.Monad.Trans.Class (MonadTrans (lift))
 import Control.Monad.Trans.Except (throwE)
 import Data.List.Split (splitOn)
-import Data.Maybe (fromMaybe)
-import Domain.Model (AppError (DockerError, IOError), AppInfo (AppInfo), AppStatus (Running, Stopped), ProjectName, ProjectUrl, Result)
+import Domain.Model (AppError (IOError), AppInfo (AppInfo), AppStatus (Stopped), ProjectName, ProjectUrl, Result)
 import Domain.Port (DockerRepo (..), Env (..), FsRepo (..), GitRepo (..))
 import Pkg.IO (promptYesNo, tryIO)
 import System.Directory (doesDirectoryExist)
@@ -71,7 +70,7 @@ status env project = do
   maybeCid <- getCid dockerRepo projectPath
   case maybeCid of
     Nothing -> pure $ AppInfo project Stopped
-    Just cid -> getInfo dockerRepo cid
+    Just cid -> getInfo dockerRepo project cid
 
 checkProjectExists :: ProjectName -> Result ()
 checkProjectExists name = do

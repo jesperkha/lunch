@@ -28,5 +28,8 @@ data AppStatus = Running | Stopped
   deriving (Show)
 
 data ContainerInfo = ContainerInfo
-  {
+  { cName    :: String,
+    cStatus  :: String,
+    cRunning :: Bool,
+    cImage   :: String
   }

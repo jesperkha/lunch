@@ -1,9 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Infra.Docker (newDockerRepo) where
 
 import Control.Monad (unless)
 import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Except (throwE)
-import Domain.Model (AppError (..), AppInfo (AppInfo), AppStatus (Running), ContainerInfo, Result)
+import Data.Aeson (Value, decode, withObject, (.:))
+import Data.Aeson.Types (Parser, parseMaybe)
+import qualified Data.ByteString.Lazy.Char8 as BSL
+import Data.Maybe (listToMaybe)
+import Domain.Model (AppError (..), AppInfo (AppInfo), AppStatus (..), ContainerInfo (..), Result)
 import Domain.Port (DockerRepo (..), Logger (..))
 import Pkg.IO (tryCmd)
 import System.Directory (doesFileExist)
@@ -34,8 +40,28 @@ runCompose logger msg args err dir = do
       throwE err
     Right _ -> pure ()
 
+-- | Parse json output from Docker inspect command into ContainerInfo.
 parseInspectJson :: String -> Maybe ContainerInfo
-parseInspectJson raw = Nothing
+parseInspectJson raw = do
+  arr <- decode (BSL.pack raw) :: Maybe [Value]
+  val <- listToMaybe arr
+  parseMaybe parseContainer val
+
+parseContainer :: Value -> Parser ContainerInfo
+parseContainer = withObject "container" $ \o -> do
+  name <- o .: "Name"
+  state <- o .: "State"
+  status <- state .: "Status"
+  running <- state .: "Running"
+  config <- o .: "Config"
+  image <- config .: "Image"
+  pure
+    ContainerInfo
+      { cName = name,
+        cStatus = status,
+        cRunning = running,
+        cImage = image
+      }
 
 newDockerRepo :: Logger -> DockerRepo
 newDockerRepo logger =
@@ -49,7 +75,7 @@ newDockerRepo logger =
             lift $ logError logger (show e)
             throwE (DockerError "Failed to read container id")
           Right cid -> pure $ if cid == "" then Nothing else Just cid,
-      getInfo = \cid -> do
+      getInfo = \name cid -> do
         result <- tryCmd "docker" ["inspect", cid]
         maybeInfo <- case result of
           Left e -> do
@@ -57,6 +83,6 @@ newDockerRepo logger =
             throwE (DockerError "Failed to inspect container")
           Right raw -> pure $ parseInspectJson raw
         case maybeInfo of
-          Just cinfo -> pure (AppInfo "" Running)
+          Just cinfo -> pure (AppInfo name (if cRunning cinfo then Running else Stopped))
           Nothing -> throwE $ DockerError "Failed to parse inspect output"
     }
