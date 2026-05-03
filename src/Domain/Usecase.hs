@@ -15,7 +15,7 @@ projectDir :: ProjectName -> FilePath
 projectDir p = workDir </> p
 
 projectName :: String -> String
-projectName url = takeBaseName (last $ splitOn "/" url)
+projectName = takeBaseName . last . splitOn "/"
 
 -- | Pull, build, and deploy a given GitHub repo
 deploy :: Env -> ProjectUrl -> Result ()
@@ -67,9 +67,7 @@ status env project = do
   checkProjectExists project
   let projectPath = projectDir project
   maybeCid <- getCid dockerRepo projectPath
-  case maybeCid of
-    Nothing -> pure $ AppInfo project Stopped
-    Just cid -> getInfo dockerRepo project cid
+  maybe (pure $ AppInfo project Stopped) (getInfo dockerRepo project) maybeCid
 
 checkProjectExists :: ProjectName -> Result ()
 checkProjectExists name = do
