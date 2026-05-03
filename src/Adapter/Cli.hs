@@ -5,7 +5,6 @@ module Adapter.Cli (runCli) where
 import Bootstrap (Env (..))
 import Control.Exception (IOException, try)
 import Control.Monad.Trans.Except (runExceptT)
-import Data.List (intercalate)
 import Domain.Model (AppError, AppInfo (infoService, infoStatus), ProjectName, ProjectUrl, Result)
 import Domain.Port (Logger (..))
 import Domain.Usecase (deploy, down, fetch, list, remove, status, up, update)
@@ -64,13 +63,10 @@ runCommand env f = do
 
 printAppInfo :: AppInfo -> IO ()
 printAppInfo appInfo = do
-  putStrLn "NAME\tSTATUS"
-  putStrLn $
-    intercalate
-      "\t"
-      [ infoService appInfo,
-        show $ infoStatus appInfo
-      ]
+  let col = max (length "NAME") (length (infoService appInfo)) + 2
+      pad s = s <> replicate (col - length s) ' '
+  putStrLn $ pad "NAME" <> "STATUS"
+  putStrLn $ pad (infoService appInfo) ++ show (infoStatus appInfo)
 
 -- | Run the CLI adapter
 runCli :: Env -> IO ()
